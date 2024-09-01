@@ -12,7 +12,8 @@ const (
     batchSize  = 1000
     wordSize   = 4
     maxWorkers = 16
-    baseURL    = "https://jbx.co.za"
+//     baseURL    = "https://jbx.co.za"
+    baseURL    = "http://localhost:8080"
     maxConcurrentRequests = 400
 )
 

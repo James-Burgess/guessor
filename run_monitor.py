@@ -1,97 +1,68 @@
 import subprocess
-import psutil
-import argparse
 import time
 import csv
-import os
-import threading
-
-from loguru import logger
+import datetime
+import json
 
 
-def run_script_and_log_stats(script, timeout=None):
-    logger.info(f"Starting script: '{script}' with timeout: {timeout} seconds")
+def run_and_log(image_dir):
+    timestamp = datetime.datetime.now().strftime("%s")
+    output_file = f"{image_dir}_{timestamp}.csv"
 
-    csv_filename = f"run_results/resource_usage_{time.strftime('%Y%m%d_%H%M%S')}.csv"
-    os.makedirs(os.path.dirname(csv_filename), exist_ok=True)  # Create directory if it doesn't exist
-    process = subprocess.Popen(script.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    pid = process.pid
+    # Build the Docker image
+    subprocess.run(["docker", "build", "-q", f"./{image_dir}"])
 
-    # Start threads for monitoring and resource logging
-    monitor_thread = threading.Thread(target=monitor_script, args=(process, timeout))
-    resource_thread = threading.Thread(target=log_resource_usage, args=(pid, csv_filename))
+    # Run the container and capture its ID
+    build_id = subprocess.check_output(["docker", "build", "-q", f"./{image_dir}"]).decode().strip()
+    print(f"Built image {build_id}")
+    try:
+        container_id = subprocess.run(["docker", "run", "--rm", "-d", "-p", "8080:8080", build_id], capture_output=True).stdout.decode().strip()
+        print(f"Server started on port 8080. Container ID: {container_id}")
 
-    monitor_thread.start()
-    resource_thread.start()
-
-    # Wait for threads to complete
-    monitor_thread.join()
-    resource_thread.join()
-
-    logger.info(f"Script finished with PID: {pid}")
+        log_stats(container_id, output_file)
+    finally:
+        subprocess.run(["docker", "stop", container_id])
+        subprocess.run(["docker", "rm", "-f", container_id])
 
 
-def monitor_script(process, timeout=None):
-    """
-    Monitors the script's output and termination.
-    """
-    start_time = time.time()
+def log_stats(container_id, output_file):
+    # Create the output file with headers
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["Timestamp", "CPU_Percent", "Memory_Usage", "Block_IO", "Memory_Percent", "PIDs", "Network_IO"])
+
+    print(f"Starting monitoring loop. writing to {output_file}...")
     while True:
-        output_line = process.stdout.readline()
-        if output_line:
-            print(output_line.strip())  # Immediate feedback
-            logger.info(f"[Script Output] {output_line.strip()}")
+        # Get Docker stats in JSON format
+        stats_json = subprocess.check_output(
+            ["docker", "stats", "--no-stream", "--format", "{{json .}}", container_id]).decode()
+        print(stats_json)
+        # {"BlockIO":"0B / 0B","CPUPerc":"7.21%","Container":"","ID":"63778442ae5a","MemPerc":"0.06%","MemUsage":"22.25MiB / 39.02GiB","Name":"happy_kirch","NetIO":"526B / 0B","PIDs":"2"}
 
-        if process.poll() is not None:  # Process has terminated
-            break
+        stats_json = json.loads(stats_json)
 
-        if timeout and time.time() - start_time > timeout:
-            logger.warning(f"Timeout reached after {timeout} seconds. Terminating script.")
-            process.terminate()
-            break
+        # Extract relevant metrics
+        timestamp = int(time.time())
+        cpu_percent = stats_json["CPUPerc"]
+        memory_usage = stats_json["MemUsage"]
+        memory_percent = stats_json["MemPerc"]
+        network_io_received = stats_json["NetIO"]
+        pids = stats_json["PIDs"]
+        blkio_stats = stats_json["BlockIO"]
 
-    error_output = process.stderr.read()
-    if error_output:
-        logger.error(f"[Script Error] {error_output}")
+        # Append data to the output file
+        with open(output_file, 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([timestamp, cpu_percent, memory_usage, blkio_stats, memory_percent, pids, network_io_received])
 
-
-def log_resource_usage(pid, csv_filename):
-    fieldnames = ['Timestamp', 'PID', 'CPU_Percent', 'Memory_MB']
-
-    if not os.path.exists(csv_filename):
-        with open(csv_filename, 'w', newline='') as csvfile:
-            fieldnames = ['Timestamp', 'PID', 'CPU_Percent', 'Memory_MB']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-
-    while True:
-        try:
-            proc = psutil.Process(pid)
-        except psutil.NoSuchProcess:
-            break  # Process has finished
-
-        cpu_percent = proc.cpu_percent()
-        memory_info = proc.memory_info()
-
-        log_message = f"[Resource Usage] CPU: {cpu_percent}%, Memory: {memory_info.rss / 1024 ** 2:.2f} MB"
-        logger.info(log_message)
-
-        with open(csv_filename, 'a', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({
-                'Timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-                'PID': pid,
-                'CPU_Percent': cpu_percent,
-                'Memory_MB': memory_info.rss / 1024 ** 2
-            })
-
-        time.sleep(5)  # Log every 5 seconds
+        time.sleep(1)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run a Python script, stream output, and log resource usage.')
-    parser.add_argument('script_path', help='Path to the Python script to run.')
-    parser.add_argument('-t', '--timeout', type=int, default=None, help='Optional timeout in seconds.')
-    args = parser.parse_args()
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        print("Please provide the image directory as an argument.")
+        sys.exit(1)
 
-    run_script_and_log_stats(args.script_path, timeout=args.timeout)
+    image_dir = sys.argv[1]
+    run_and_log(image_dir)

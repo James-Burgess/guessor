@@ -1,9 +1,11 @@
-FROM python:3.8-slim
+FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 COPY . /app
-RUN pip install -r requirements.txt
+
+COPY ../requirements.txt /app
+RUN pip install -r /app/requirements.txt
 
 # Install Gunicorn
 RUN pip install gunicorn
@@ -12,4 +14,4 @@ RUN pip install gunicorn
 EXPOSE 8080
 
 # The command to start Gunicorn
-CMD ["gunicorn", "-w", "1", "--bind", "0.0.0.0:8080", "server:app"]
+CMD ["gunicorn", "-w", "9", "--bind", "0.0.0.0:8080", "server:app"]

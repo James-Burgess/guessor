@@ -96,5 +96,6 @@ def batch_words(iterable, n):
 
 
 if __name__ == "__main__":
-    base_url = "https://jbx.co.za"
+    # base_url = "https://jbx.co.za"
+    base_url = "http://localhost:8080"
     result = brute_force_api(base_url)

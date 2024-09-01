@@ -1,0 +1,11 @@
+jbx.co.za {
+    reverse_proxy guessor:8080
+    @cloudflare {
+        header X-Forwarded-For *
+    }
+    handle @cloudflare {
+        reverse_proxy guessor:8080 {
+            header_up X-Real-IP {http.request.header.X-Forwarded-For}
+        }
+    }
+}

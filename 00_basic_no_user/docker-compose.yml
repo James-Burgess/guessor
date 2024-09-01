@@ -1,0 +1,22 @@
+services:
+  guessor:
+    image: jimmyburgess/guessor:basic-no-user
+    restart: always
+
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    restart: always
+
+  ctop:
+    image: quay.io/vektorlab/ctop:latest
+    tty: true
+    stdin_open: true
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

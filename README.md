@@ -40,12 +40,23 @@ python guessors/brute_aio.py
 
 
 ## TODO
-- [*] Set up logging and metrics for the running server
+- [x] Set up logging and metrics for the running server
 - [ ] Set up a nice way to view all the results of different guessers and servers
-- [*] Set up a way to blast the server with requests
+  - [x] setup basic plotly dash
+  - [ ] update the dash to show everything at once
+  - [ ] update the dash to show the results of different guess/server runs
+  - [ ] add the results of a guess run to the results page (single run, 5 parallel and 50 parallel)
+- [x] Set up a way to blast the server with requests
 - [ ] Add a basic user system
 - [ ] Add a basic user system with a database
-
+- [ ] Implement fast api version of the server
+- [ ] Implement an async version of the server
+- [ ] Implement an queuing version of the server
+- [ ] Implment a golang version of the server
+- [ ] Implement a elixir version of the server
+- [ ] Live server stats page
+- [ ] LOIC test
+- [ ] writeup
 
 ## License
 WTFPL

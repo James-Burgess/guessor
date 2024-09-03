@@ -1,0 +1,88 @@
+body {
+    font-family: sans-serif;
+    background-color: #f0f5f0; /* Light Green */
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    color: #28a745; /* Brat Green */
+}
+
+a {
+    color: #007bff; /* Blue */
+}
+
+pre {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 3px;
+}
+
+#registrationForm input[type="text"] {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+}
+
+#registrationForm button[type="submit"] {
+    background-color: #28a745; /* Brat Green */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Basic Styling for the Tabs */
+.code-tabs {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.tab-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+}
+
+.tab-link {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.tab-link.active {
+    background-color: #fff;
+    border-bottom: 2px solid #007bff; /* Example active color */
+}
+
+.tab-content {
+    padding: 15px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Optional: Styling for the <pre> code blocks */
+pre {
+    background-color: #f5f5f5;
+    padding: 10px;
+    overflow-x: auto; /* Add horizontal scrollbar if needed */
+}

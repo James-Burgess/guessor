@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guessor!</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Hey Nerds!</h1>
+        <p>welcome to the guessing game by <a href="https://jimmyb.co.za">Jimmy</a></p>
+        <p>You will need to guess a word!</p>
+        <p>It is a 4 letter word.</p>
+        <p>The server can handle a lot so go wild</p>
+        <p>hit the URL  <a href='/guess/<my_guess>'>Guess it at '/guess/<my_guess>'</a>" you'll get a 400 if incorrect and a 200 if correct</p>
+        <p>Use the password to enter our secret lounge at <a href="/lounge">/lounge</a></p>
+        <p>There's a leaderboard and prizes for 'least guesses', 'fastest to guess' and 'most attempts in a second'</p>
+
+        <h2>Register Your Username</h2>
+        <form id="registrationForm">
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <button type="submit">Register</button>
+        </form>
+
+        <div id="guessForm" style="display: none;">
+            <h2>Guess the Word</h2>
+            <form>
+                <input type="text" id="guess" name="guess" placeholder="Enter your guess" required>
+                <button type="submit">Guess</button>
+            </form>
+            <p id="guessResponse"></p>
+        </div>
+
+        <p>Here is some sample code on how to do it!</p>
+
+
+        <div class="code-tabs">
+    <ul class="tab-nav">
+        <li class="tab-link active" data-tab="python">Python</li>
+        <li class="tab-link" data-tab="javascript">JavaScript</li>
+    </ul>
+
+    <div class="tab-content">
+        <pre id="python" class="tab-pane active">
+import requests
+
+base_url = "https://jbx.co.za/guess/"
+username = "your_username"  # Replace with the actual username
+
+for a in range(ord('a'), ord('z') + 1):
+    for b in range(ord('a'), ord('z') + 1):
+        for c in range(ord('a'), ord('z') + 1):
+            for d in range(ord('a'), ord('z') + 1):
+                word = chr(a) + chr(b) + chr(c) + chr(d)
+                full_url = base_url + word
+
+                # Include the username cookie directly in the request headers
+                response = requests.get(full_url, cookies={"username": username})
+
+                if response.status_code == 200:
+                    print("Success! The word is:", word)
+                    break
+
+        </pre>
+        <pre id="javascript" class="tab-pane">
+const base_url = "https://jbx.co.za/guess/";
+const username = "your_username"; // Replace with the actual username
+
+for (let a = 'a'.charCodeAt(0); a <= 'z'.charCodeAt(0); a++) {
+  for (let b = 'a'.charCodeAt(0); b <= 'z'.charCodeAt(0); b++) {
+    for (let c = 'a'.charCodeAt(0); c <= 'z'.charCodeAt(0); c++) {
+      for (let d = 'a'.charCodeAt(0); d <= 'z'.charCodeAt(0); d++) {
+        const word = String.fromCharCode(a) + String.fromCharCode(b) + String.fromCharCode(c) + String.fromCharCode(d);
+        const full_url = base_url + word;
+
+        fetch(full_url, {
+          method: 'GET',
+          headers: {
+            'Cookie': `username=${username}` // Set the username cookie in the request headers
+          }
+        })
+        .then(response => {
+          if (response.ok) { // Check if the response status is OK (200)
+            console.log("Success! The word is:", word);
+            // You might want to add a mechanism to break out of the nested loops here
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+      }
+    }
+  }
+}
+            </pre>
+    </div>
+</div>
+    </div>
+    <script src="static/scripts.js"></script>
+</body>
+</html>

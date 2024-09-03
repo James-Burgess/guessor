@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY . /app
 
-COPY ../requirements.txt /app
+COPY requirements.txt /app
 RUN pip install -r /app/requirements.txt
 
 # Install Gunicorn
